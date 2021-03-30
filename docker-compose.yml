@@ -75,7 +75,7 @@ services:
 # Networks to be created to facilitate communication between containers
 networks:
   static_ip:
-    name: my_network
+    name: mynet
     ipam:
       driver: default
       config:
