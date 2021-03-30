@@ -1,0 +1,82 @@
+version: '3.5'
+services:
+
+#mysql manager
+   mysql_manager:
+     image: mysql/mysql-cluster:8.0
+     networks:
+      static_ip:
+        ipv4_address: 198.168.0.2
+     restart:  always
+     volumes:
+       - ./cnf/my.cnf:/etc/my.cnf
+       - ./cnf/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+     command: ["ndb_mgmd"]
+
+       
+#mysql Data Node 1
+   node_data_1:
+     image: mysql/mysql-cluster:8.0
+     networks:
+      static_ip:
+        ipv4_address: 198.168.0.3
+     restart:      always
+     volumes:
+       - ./cnf/my.cnf:/etc/my.cnf
+       - ./cnf/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+     command: ["ndbd"]
+
+#mysql Data Node 2
+   node_data_2:
+     image: mysql/mysql-cluster:8.0
+     networks:
+      static_ip:
+        ipv4_address: 198.168.0.4
+     restart:      always
+     volumes:
+       - ./cnf/my.cnf:/etc/my.cnf
+       - ./cnf/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+     command: ["ndbd"]
+
+#mysql-server-1
+   mysql_server_1:
+     image: mysql/mysql-cluster:8.0
+     environment: 
+       - "MYSQL_ROOT_PASSWORD=anand"
+     networks:
+      static_ip:
+        ipv4_address: 198.168.0.9
+     restart:      always
+     volumes:
+       - ./cnf/my.cnf:/etc/my.cnf
+       - ./cnf/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+     command: ["mysqld"]
+     ports:
+       - 5000:3306
+
+#mysql-server 2
+   mysql_server_2:
+     image: mysql/mysql-cluster:8.0
+     environment: 
+       - "MYSQL_ROOT_PASSWORD=anand"
+     networks:
+      static_ip:
+        ipv4_address: 198.168.0.10
+     restart:      always
+     volumes:
+       - ./cnf/my.cnf:/etc/my.cnf
+       - ./cnf/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+     command: ["mysqld"]
+     ports:
+       - 5001:3306
+
+# Networks to be created to facilitate communication between containers
+networks:
+  static_ip:
+    name: my_network
+    ipam:
+      driver: default
+      config:
+        - subnet: 198.168.0.0/16
